@@ -129,11 +129,11 @@ most_popular_author = author_sales.idxmax()  # this is now a string
 most_popular_count = author_sales.max()
 
 # top customer by total spending
-user_sales = df3.merge(unique_users, left_on='user_id', right_on='id')
-user_sales['user_key'] = user_sales.apply(lambda row: (row['name'], row['address'], row['phone'], row['email']),axis=1)
-user_spending = user_sales.groupby('user_key')['paid_price'].sum()
-max_spending = user_spending.max()
-top_customer = [list(user) for user, val in user_spending.items() if val == max_spending]
+user_sales = df3.merge(df, left_on='user_id', right_on='id')
+spending_per_user = user_sales.groupby('user_id')['paid_price'].sum()
+max_spending = spending_per_user.max()
+top_customers_ids = spending_per_user[spending_per_user == max_spending].index.tolist()
+top_customers_info = df[df['id'].isin(top_customers_ids)]
 
 
 plt.figure(figsize=(12,6))
@@ -166,7 +166,9 @@ with tab2:
     st.metric("Unique Users", unique_users_count)
 
     st.header("Top Customer(s)")
-    st.write(top_customer)
+    st.write("User IDs of best buyer(s):", top_customers_ids)
+    st.dataframe(top_customers_info)
+    st.metric("Top Customer Spending", max_spending)
 
 # -------- TAB 3: Authors --------
 with tab3:
@@ -176,4 +178,5 @@ with tab3:
     st.header("Most Popular Author(s)")
     st.write(most_popular_author)
     st.write(f"Sold count: {most_popular_count}")
+
 
