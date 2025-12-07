@@ -9,13 +9,11 @@ from dateutil import parser
 import matplotlib.pyplot as plt
 import streamlit as st
 
-# engine = create_engine('postgresql+psycopg2://postgres:bekzod8077@localhost:5432/postgres')
-
 # --------------------- Cleaning data ---------------------
 
 # ================  USERS   ================
 
-df = pd.read_csv('users.csv').drop_duplicates()
+df = pd.read_csv('DATA1/users.csv').drop_duplicates()
 df['phone'] = df['phone'].astype(str).str.replace(r'\D', '', regex=True)
 df['phone'] = df['phone'].apply(lambda x: x[:10].ljust(10, '0'))     # fix short numbers safely
 df['phone'] = df['phone'].apply(lambda x: x[0:3] + '-' + x[3:6] + '-' + x[6:10])
@@ -24,7 +22,7 @@ df = df.fillna('No Info')
 
 # ================  BOOKS   ================
 
-with open('books.yaml', 'r', encoding='utf-8') as read_file:
+with open('DATA1/books.yaml', 'r', encoding='utf-8') as read_file:
     books = yaml.safe_load(read_file)
 
 clean_books = [{k.lstrip(':'): v for k, v in b.items()} for b in books]
@@ -45,7 +43,7 @@ df2["year"] = df2["year"].apply(clean_year)
 
 # ================  ORDERS  ================
 
-df3 = pd.read_parquet('orders.parquet').drop_duplicates()
+df3 = pd.read_parquet('DATA3/orders.parquet').drop_duplicates()
 df3 = df3.fillna('No Info').replace(['NULL', ''], 'No Info')
 
 # cleaning and changing formats in timetable column
@@ -104,26 +102,6 @@ def convert_to_usd(x):
 
 df3['unit_price'] = df3['unit_price'].apply(convert_to_usd)
 df3['paid_price'] = df3['quantity'] * df3['unit_price']
-
-# connection to postgres
-# if not os.getenv("STREAMLIT_ENV"):  # Running locally, not in Streamlit Cloud
-#     engine = create_engine('postgresql+psycopg2://postgres:bekzod8077@localhost:5432/postgres')
-#
-#     with engine.connect() as db:
-#         db.execute(text("DROP TABLE IF EXISTS users;"))
-#         db.commit()
-#     df.to_sql('users', engine, index=False)
-#
-#     with engine.connect() as db2:
-#         db2.execute(text("DROP TABLE IF EXISTS books;"))
-#         db2.commit()
-#     df2.to_sql('books', engine, index=False)
-#
-#     with engine.connect() as db3:
-#         db3.execute(text("DROP TABLE IF EXISTS orders;"))
-#         db3.commit()
-#     df3.to_sql('orders', engine, index=False)
-
 
 # ----------------------------------------------------
 
@@ -198,4 +176,5 @@ with tab3:
 
     st.header("Most Popular Author(s)")
     st.write(most_popular_author)
+
     st.write(f"Sold count: {most_popular_count}")
