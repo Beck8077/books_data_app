@@ -3,9 +3,7 @@ import numpy as np
 import yaml
 import csv
 import re
-# from sqlalchemy import create_engine, text
 from dateutil import parser
-# import os
 import matplotlib.pyplot as plt
 import streamlit as st
 
@@ -178,3 +176,4 @@ with tab3:
     st.write(most_popular_author)
 
     st.write(f"Sold count: {most_popular_count}")
+
