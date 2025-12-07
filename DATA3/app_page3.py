@@ -11,7 +11,7 @@ import streamlit as st
 
 # ================  USERS   ================
 
-df = pd.read_csv('users.csv').drop_duplicates()
+df = pd.read_csv('DATA3/users.csv').drop_duplicates()
 df['phone'] = df['phone'].astype(str).str.replace(r'\D', '', regex=True)
 df['phone'] = df['phone'].apply(lambda x: x[:10].ljust(10, '0'))     # fix short numbers safely
 df['phone'] = df['phone'].apply(lambda x: x[0:3] + '-' + x[3:6] + '-' + x[6:10])
@@ -20,7 +20,7 @@ df = df.fillna('No Info')
 
 # ================  BOOKS   ================
 
-with open('books.yaml', 'r', encoding='utf-8') as read_file:
+with open('DATA3/books.yaml', 'r', encoding='utf-8') as read_file:
     books = yaml.safe_load(read_file)
 
 clean_books = [{k.lstrip(':'): v for k, v in b.items()} for b in books]
@@ -41,7 +41,7 @@ df2["year"] = df2["year"].apply(clean_year)
 
 # ================  ORDERS  ================
 
-df3 = pd.read_parquet('orders.parquet').drop_duplicates()
+df3 = pd.read_parquet('DATA3/orders.parquet').drop_duplicates()
 df3 = df3.fillna('No Info').replace(['NULL', ''], 'No Info')
 
 # cleaning and changing formats in timetable column
@@ -174,4 +174,5 @@ with tab3:
 
     st.header("Most Popular Author(s)")
     st.write(most_popular_author)
+
     st.write(f"Sold count: {most_popular_count}")
