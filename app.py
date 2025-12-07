@@ -119,11 +119,15 @@ unique_users = df[['id', 'name', 'address', 'phone', 'email']].drop_duplicates()
 unique_users_count = len(unique_users)
 
 # most popular author (by sold book count)
-orders_books = df3.merge(df2, left_on='book_id', right_on='id')
+orders_books = df_orders.merge(df_books, left_on='book_id', right_on='id')
 orders_books['author_set'] = orders_books['author_set'].apply(lambda x: x[0] if isinstance(x, tuple) else str(x))
 author_sales = orders_books.groupby('author_set')['quantity'].sum()
-most_popular_author = author_sales.idxmax()  # this is now a string
-most_popular_count = author_sales.max()
+if not author_sales.empty:
+    most_popular_author = author_sales.idxmax()
+    most_popular_count = author_sales.max()
+else:
+    most_popular_author = "No data available"
+    most_popular_count = 0
 
 # top customer by total spending
 user_sales = df3.merge(df, left_on='user_id', right_on='id')
@@ -176,4 +180,5 @@ with tab3:
     st.write(most_popular_author)
 
     st.write(f"Sold count: {most_popular_count}")
+
 
