@@ -103,26 +103,6 @@ def convert_to_usd(x):
 df3['unit_price'] = df3['unit_price'].apply(convert_to_usd)
 df3['paid_price'] = df3['quantity'] * df3['unit_price']
 
-# connection to postgres
-if not os.getenv("STREAMLIT_ENV"):  # Running locally, not in Streamlit Cloud
-    engine = create_engine('postgresql+psycopg2://postgres:bekzod8077@localhost:5432/postgres')
-
-    with engine.connect() as db:
-        db.execute(text("DROP TABLE IF EXISTS users;"))
-        db.commit()
-    df.to_sql('users', engine, index=False)
-
-    with engine.connect() as db2:
-        db2.execute(text("DROP TABLE IF EXISTS books;"))
-        db2.commit()
-    df2.to_sql('books', engine, index=False)
-
-    with engine.connect() as db3:
-        db3.execute(text("DROP TABLE IF EXISTS orders;"))
-        db3.commit()
-    df3.to_sql('orders', engine, index=False)
-
-
 # ----------------------------------------------------
 
 # daily revenue and top 5 days
@@ -195,3 +175,4 @@ with tab3:
     st.write(most_popular_authors)
 
     st.write(f"Sold count: {most_popular_count}")
+
