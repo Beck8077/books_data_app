@@ -3,9 +3,9 @@ import numpy as np
 import yaml
 import csv
 import re
-from sqlalchemy import create_engine, text
+# from sqlalchemy import create_engine, text
 from dateutil import parser
-import os
+# import os
 import matplotlib.pyplot as plt
 import streamlit as st
 
@@ -13,7 +13,7 @@ import streamlit as st
 
 # ================  USERS   ================
 
-df = pd.read_csv('DATA1/users.csv').drop_duplicates()
+df = pd.read_csv('users.csv').drop_duplicates()
 df['phone'] = df['phone'].astype(str).str.replace(r'\D', '', regex=True)
 df['phone'] = df['phone'].apply(lambda x: x[:10].ljust(10, '0'))     # fix short numbers safely
 df['phone'] = df['phone'].apply(lambda x: x[0:3] + '-' + x[3:6] + '-' + x[6:10])
@@ -22,7 +22,7 @@ df = df.fillna('No Info')
 
 # ================  BOOKS   ================
 
-with open('DATA1/books.yaml', 'r', encoding='utf-8') as read_file:
+with open('books.yaml', 'r', encoding='utf-8') as read_file:
     books = yaml.safe_load(read_file)
 
 clean_books = [{k.lstrip(':'): v for k, v in b.items()} for b in books]
@@ -43,7 +43,7 @@ df2["year"] = df2["year"].apply(clean_year)
 
 # ================  ORDERS  ================
 
-df3 = pd.read_parquet('DATA1/orders.parquet').drop_duplicates()
+df3 = pd.read_parquet('orders.parquet').drop_duplicates()
 df3 = df3.fillna('No Info').replace(['NULL', ''], 'No Info')
 
 # cleaning and changing formats in timetable column
@@ -103,6 +103,7 @@ def convert_to_usd(x):
 df3['unit_price'] = df3['unit_price'].apply(convert_to_usd)
 df3['paid_price'] = df3['quantity'] * df3['unit_price']
 
+
 # ----------------------------------------------------
 
 # daily revenue and top 5 days
@@ -117,21 +118,22 @@ df2['author_set'] = df2['author'].apply(normalize_authors)
 unique_author_sets = df2['author_set'].nunique()
 
 # real unique users
-def normalize_user(row):
-    return (row['name'], row['address'], row['phone'], row['email'])
-df['user_key'] = df.apply(normalize_user, axis=1)
-unique_users_count = df['user_key'].nunique()
+unique_users = df[['id', 'name', 'address', 'phone', 'email']].drop_duplicates()
+unique_users_count = len(unique_users)
 
 # most popular author (by sold book count)
 orders_books = df3.merge(df2, left_on='book_id', right_on='id')
+orders_books['author_set'] = orders_books['author_set'].apply(lambda x: x[0] if isinstance(x, tuple) else str(x))
 author_sales = orders_books.groupby('author_set')['quantity'].sum()
-most_popular_authors = author_sales.idxmax()
+most_popular_author = author_sales.idxmax()  # this is now a string
 most_popular_count = author_sales.max()
 
 # top customer by total spending
-user_sales = df3.merge(df, left_on='user_id', right_on='id')
+user_sales = df3.merge(unique_users, left_on='user_id', right_on='id')
+user_sales['user_key'] = user_sales.apply(lambda row: (row['name'], row['address'], row['phone'], row['email']),axis=1)
 user_spending = user_sales.groupby('user_key')['paid_price'].sum()
-top_customer = [list(user) for user, val in user_spending.items() if val == user_spending.max()]
+max_spending = user_spending.max()
+top_customer = [list(user) for user, val in user_spending.items() if val == max_spending]
 
 
 plt.figure(figsize=(12,6))
@@ -172,7 +174,5 @@ with tab3:
     st.metric("Unique Author Sets", unique_author_sets)
 
     st.header("Most Popular Author(s)")
-    st.write(most_popular_authors)
-
+    st.write(most_popular_author)
     st.write(f"Sold count: {most_popular_count}")
-
