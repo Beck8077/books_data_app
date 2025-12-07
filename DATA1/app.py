@@ -9,8 +9,6 @@ import os
 import matplotlib.pyplot as plt
 import streamlit as st
 
-engine = create_engine('postgresql+psycopg2://postgres:bekzod8077@localhost:5432/postgres')
-
 # --------------------- Cleaning data ---------------------
 
 # ================  USERS   ================
@@ -195,4 +193,5 @@ with tab3:
 
     st.header("Most Popular Author(s)")
     st.write(most_popular_authors)
+
     st.write(f"Sold count: {most_popular_count}")
