@@ -1,9 +1,0 @@
-pandas
-numpy
-PyYAML
-python-dateutil
-sqlalchemy
-psycopg2-binary
-matplotlib
-streamlit
-pyarrow
